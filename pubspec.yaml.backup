@@ -64,7 +64,7 @@ dependencies:
   excel: ^4.0.2
 
   # Contacts
-  flutter_contacts: ^1.1.7+1
+  contacts_service: ^0.6.3
 
   # Charts & Analytics
   fl_chart: ^0.66.0
