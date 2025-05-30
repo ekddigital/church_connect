@@ -70,6 +70,27 @@ class AuthApiService {
     return UserModel.fromJson(response.data['user']);
   }
 
+  /// Update user role (super admin only)
+  Future<UserModel> updateUserRole(String userId, UserRole newRole) async {
+    final response = await _apiService.put('/users/$userId/role', data: {
+      'role': newRole.name,
+    });
+    return UserModel.fromJson(response.data['user']);
+  }
+
+  /// Get all users (admin/super admin only)
+  Future<List<UserModel>> getAllUsers() async {
+    final response = await _apiService.get('/users');
+    return (response.data['users'] as List)
+        .map((user) => UserModel.fromJson(user))
+        .toList();
+  }
+
+  /// Delete user (super admin only)
+  Future<void> deleteUser(String userId) async {
+    await _apiService.delete('/users/$userId');
+  }
+
   /// Reset password
   Future<void> resetPassword(String email) async {
     await _apiService.post('/auth/reset-password', data: {
@@ -85,6 +106,19 @@ class AuthApiService {
   /// Clear authentication token
   void clearAuthToken() {
     _apiService.clearAuthToken();
+  }
+
+  /// Login with Google
+  Future<AuthResponse> loginWithGoogle({
+    required String idToken,
+    required String accessToken,
+  }) async {
+    final response = await _apiService.post('/auth/google', data: {
+      'idToken': idToken,
+      'accessToken': accessToken,
+    });
+
+    return AuthResponse.fromJson(response.data);
   }
 }
 

@@ -78,6 +78,9 @@ class UserModel {
 
 /// User Roles for Role-Based Access Control
 enum UserRole {
+  @JsonValue('super_admin')
+  superAdmin,
+
   @JsonValue('admin')
   admin,
 
@@ -92,6 +95,8 @@ enum UserRole {
 
   String get displayName {
     switch (this) {
+      case UserRole.superAdmin:
+        return 'Super Administrator';
       case UserRole.admin:
         return 'Administrator';
       case UserRole.ministryLeader:
@@ -105,6 +110,23 @@ enum UserRole {
 
   List<String> get permissions {
     switch (this) {
+      case UserRole.superAdmin:
+        return [
+          'manage_super_admins',
+          'manage_users',
+          'manage_members',
+          'send_messages',
+          'view_analytics',
+          'manage_templates',
+          'manage_automation',
+          'manage_organization',
+          'export_data',
+          'import_data',
+          'system_settings',
+          'audit_logs',
+          'manage_subscriptions',
+          'platform_admin',
+        ];
       case UserRole.admin:
         return [
           'manage_users',

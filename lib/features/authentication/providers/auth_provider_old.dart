@@ -115,6 +115,56 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Sign up with email and password
+  Future<void> signUp({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String organizationName,
+    required String organizationType,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final authResponse = await _authApiService.register(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        organizationName: organizationName,
+        organizationType: organizationType,
+      );
+
+      if (authResponse.success && authResponse.token != null) {
+        // Store authentication token
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', authResponse.token!);
+        if (authResponse.refreshToken != null) {
+          await prefs.setString('refresh_token', authResponse.refreshToken!);
+        }
+
+        // Set token in API service
+        _authApiService.setAuthToken(authResponse.token!);
+
+        state = state.copyWith(
+          user: authResponse.user,
+          organization: authResponse.organization,
+          isLoading: false,
+          isAuthenticated: true,
+        );
+      } else {
+        throw Exception(authResponse.message ?? 'Registration failed');
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
   /// Sign in with Google
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -159,56 +209,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
       } else {
         throw Exception(authResponse.message ?? 'Google sign-in failed');
-      }
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-      rethrow;
-    }
-  }
-
-  /// Sign up with email and password
-  Future<void> signUp({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    required String organizationName,
-    required String organizationType,
-  }) async {
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      final authResponse = await _authApiService.register(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        organizationName: organizationName,
-        organizationType: organizationType,
-      );
-
-      if (authResponse.success && authResponse.token != null) {
-        // Store authentication token
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', authResponse.token!);
-        if (authResponse.refreshToken != null) {
-          await prefs.setString('refresh_token', authResponse.refreshToken!);
-        }
-
-        // Set token in API service
-        _authApiService.setAuthToken(authResponse.token!);
-
-        state = state.copyWith(
-          user: authResponse.user,
-          organization: authResponse.organization,
-          isLoading: false,
-          isAuthenticated: true,
-        );
-      } else {
-        throw Exception(authResponse.message ?? 'Registration failed');
       }
     } catch (e) {
       state = state.copyWith(
@@ -319,15 +319,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return state.user?.role.hasPermission(permission) ?? false;
   }
 
-  /// Check if user is super admin
-  bool get isSuperAdmin => state.user?.role == UserRole.superAdmin;
-
-  /// Check if user can manage users (super admin or admin)
-  bool get canManageUsers => hasPermission('manage_users');
-
-  /// Check if user can manage super admins (super admin only)
-  bool get canManageSuperAdmins => hasPermission('manage_super_admins');
-
   /// Check if user can manage members
   bool get canManageMembers => hasPermission('manage_members');
 
@@ -345,49 +336,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Check if user can manage organization
   bool get canManageOrganization => hasPermission('manage_organization');
-
-  /// Check if user can access system settings
-  bool get canAccessSystemSettings => hasPermission('system_settings');
-
-  /// Check if user can view audit logs
-  bool get canViewAuditLogs => hasPermission('audit_logs');
-
-  /// Update user role (super admin only)
-  Future<void> updateUserRole(String userId, UserRole newRole) async {
-    if (!isSuperAdmin) {
-      throw Exception('Only super admins can update user roles');
-    }
-
-    state = state.copyWith(isLoading: true, error: null);
-    try {
-      await _authApiService.updateUserRole(userId, newRole);
-
-      state = state.copyWith(isLoading: false);
-
-      // If the updated user is the current user, update the state
-      if (state.user?.id == userId) {
-        state = state.copyWith(
-          user: state.user?.copyWith(role: newRole),
-        );
-      }
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-      rethrow;
-    }
-  }
-
-  /// Promote user to admin (super admin only)
-  Future<void> promoteToAdmin(String userId) async {
-    await updateUserRole(userId, UserRole.admin);
-  }
-
-  /// Demote admin to regular user (super admin only)
-  Future<void> demoteToUser(String userId) async {
-    await updateUserRole(userId, UserRole.member);
-  }
 }
 
 /// Auth provider

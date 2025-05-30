@@ -19,7 +19,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
-    role ENUM('admin', 'pastor', 'leader', 'member') DEFAULT 'member',
+    role ENUM('super_admin', 'admin', 'pastor', 'leader', 'member') DEFAULT 'member',
     organization_id VARCHAR(36),
     is_active BOOLEAN DEFAULT TRUE,
     last_login TIMESTAMP NULL,

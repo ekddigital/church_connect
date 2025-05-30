@@ -223,6 +223,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: AppSpacing.lg),
 
+                    // Google Sign-In Button
+                    SizedBox(
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed:
+                            authState.isLoading ? null : _handleGoogleSignIn,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.grey),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Text(
+                            'G',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF4285F4), // Google Blue
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        label: const Text(
+                          'Continue with Google',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
                     // Sign Up Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -233,7 +275,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.push('/signup');
+                            context.go('/register');
                           },
                           child: const Text(
                             'Sign Up',
@@ -280,7 +322,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            'Email: admin@samplechurch.org\nPassword: demo123',
+                            'Demo Admin: admin@church.com / admin123',
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       fontFamily: 'monospace',
@@ -309,5 +351,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             values['password'] as String,
           );
     }
+  }
+
+  void _handleGoogleSignIn() async {
+    await ref.read(authProvider.notifier).signInWithGoogle();
   }
 }

@@ -44,6 +44,74 @@ export default async function handler(req, res) {
     }
 }
 
+// Handle user role updates
+async function handleRoleUpdate(req, res, connection, currentUser) {
+    const { userId } = req.query;
+    const { role } = req.body;
+
+    // Only super admins can update user roles
+    if (currentUser.role !== 'super_admin') {
+        return apiError(res, 'Only super admins can update user roles', 403);
+    }
+
+    if (!userId || !role) {
+        return apiError(res, 'User ID and role are required', 400);
+    }
+
+    const validRoles = ['super_admin', 'admin', 'ministry_leader', 'volunteer', 'member'];
+    if (!validRoles.includes(role)) {
+        return apiError(res, 'Invalid role', 400);
+    }
+
+    try {
+        // Update user role
+        const [result] = await connection.execute(
+            'UPDATE users SET role = ?, updated_at = NOW() WHERE id = ?',
+            [role, userId]
+        );
+
+        if (result.affectedRows === 0) {
+            return apiError(res, 'User not found', 404);
+        }
+
+        // Get updated user
+        const [users] = await connection.execute(
+            'SELECT u.*, o.name as organization_name FROM users u LEFT JOIN organizations o ON u.organization_id = o.id WHERE u.id = ?',
+            [userId]
+        );
+
+        const user = users[0];
+        if (!user) {
+            return apiError(res, 'User not found', 404);
+        }
+
+        const userResponse = {
+            id: user.id,
+            email: user.email,
+            displayName: user.display_name,
+            role: {
+                name: user.role,
+                permissions: getRolePermissions(user.role)
+            },
+            organizationId: user.organization_id,
+            organizationName: user.organization_name,
+            isActive: user.is_active,
+            lastLogin: user.last_login,
+            createdAt: user.created_at,
+            updatedAt: user.updated_at
+        };
+
+        return apiResponse(res, {
+            message: 'User role updated successfully',
+            user: userResponse
+        });
+
+    } catch (error) {
+        console.error('Role update error:', error);
+        return apiError(res, 'Failed to update user role', 500);
+    }
+}
+
 async function getUsers(req, res, connection, currentUser) {
     // Check permissions
     if (!hasPermission(currentUser.role, ['admin', 'pastor', 'leader'])) {
