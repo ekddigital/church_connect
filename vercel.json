@@ -1,0 +1,19 @@
+{
+    "functions": {
+        "api/**/*.js": {
+            "runtime": "nodejs18.x"
+        }
+    },
+    "env": {
+        "DATABASE_URL": "@database_url",
+        "JWT_SECRET": "@jwt_secret",
+        "ENCRYPTION_KEY": "@encryption_key"
+    },
+    "build": {
+        "env": {
+            "DATABASE_URL": "@database_url",
+            "JWT_SECRET": "@jwt_secret",
+            "ENCRYPTION_KEY": "@encryption_key"
+        }
+    }
+}

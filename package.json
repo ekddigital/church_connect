@@ -1,0 +1,32 @@
+{
+    "name": "church-connect-api",
+    "version": "1.0.0",
+    "description": "ChurchConnect Serverless API for Vercel",
+    "main": "index.js",
+    "scripts": {
+        "start": "vercel dev",
+        "build": "echo 'No build step required for serverless functions'",
+        "deploy": "vercel --prod",
+        "setup": "./scripts/deploy.sh",
+        "init-db": "./scripts/init-db.sh",
+        "test-db": "node -e \"require('dotenv').config(); const mysql = require('mysql2/promise'); mysql.createConnection(process.env.DATABASE_URL).then(connection => connection.execute('SELECT 1')).then(() => { console.log('✅ Database connection successful'); process.exit(0); }).catch((error) => { console.error('❌ Database connection failed:', error.message); process.exit(1); });\"",
+        "generate-secrets": "node -e \"const crypto = require('crypto'); console.log('JWT_SECRET=' + crypto.randomBytes(32).toString('base64')); console.log('ENCRYPTION_KEY=' + crypto.randomBytes(32).toString('base64'));\""
+    },
+    "dependencies": {
+        "mysql2": "^3.6.5",
+        "jsonwebtoken": "^9.0.2",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "joi": "^17.11.0",
+        "uuid": "^9.0.1",
+        "nodemailer": "^6.9.7",
+        "date-fns": "^2.30.0"
+    },
+    "devDependencies": {
+        "vercel": "^32.5.6"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}
