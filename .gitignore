@@ -51,6 +51,9 @@ firebase-adminsdk-*.json
 .pub-cache/
 .pub/
 /build/
+SETUP_CHECKLIST.md
+README.md
+setup.md
 
 # Symbolication related
 app.*.symbols
