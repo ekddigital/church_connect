@@ -1,0 +1,78 @@
+# Flutter and Dart files
+lib/
+android/
+ios/
+linux/
+macos/
+web/
+windows/
+build/
+test/
+assets/
+*.dart
+*.yaml
+*.yml
+*.iml
+*.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.dart_tool/
+
+# Flutter specific files
+pubspec.yaml
+pubspec.lock
+analysis_options.yaml
+firebase.json
+*.md
+
+# Dependencies
+node_modules/
+.npm
+
+# Environment and config
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation and setup files
+SETUP_CHECKLIST.md
+setup.md
+README.md
+MISSING_SECRETS.md
+
+# Database
+database/
+
+# Scripts
+scripts/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Only include API files and necessary config
+!api/
+!package.json
+!vercel.json

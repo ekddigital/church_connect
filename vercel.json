@@ -1,19 +1,15 @@
 {
-    "functions": {
-        "api/**/*.js": {
-            "runtime": "nodejs18.x"
+    "version": 2,
+    "builds": [
+        {
+            "src": "api/**/*.js",
+            "use": "@vercel/node"
         }
-    },
-    "env": {
-        "DATABASE_URL": "@database_url",
-        "JWT_SECRET": "@jwt_secret",
-        "ENCRYPTION_KEY": "@encryption_key"
-    },
-    "build": {
-        "env": {
-            "DATABASE_URL": "@database_url",
-            "JWT_SECRET": "@jwt_secret",
-            "ENCRYPTION_KEY": "@encryption_key"
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1"
         }
-    }
+    ]
 }
