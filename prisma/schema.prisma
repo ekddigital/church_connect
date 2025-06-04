@@ -1,0 +1,267 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String   @id @default(cuid())
+    email       String   @unique
+    firstName   String?
+    lastName    String?
+    phoneNumber String?
+    role        UserRole @default(MEMBER)
+    isActive    Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relationships
+    memberProfiling  MemberProfiling[]
+    welfareRequests  WelfareRequest[]
+    sentMessages     Message[]         @relation("SentMessages")
+    receivedMessages Message[]         @relation("ReceivedMessages")
+    fileUploads      FileUpload[]
+
+    @@map("users")
+}
+
+model MemberProfiling {
+    id     String @id @default(cuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    // Personal Information
+    dateOfBirth           DateTime?
+    address               String?
+    occupation            String?
+    maritalStatus         MaritalStatus?
+    emergencyContactName  String?
+    emergencyContactPhone String?
+
+    // Church Information
+    dateJoined          DateTime?
+    previousChurch      String?
+    ministryInvolvement String?
+    spiritualGifts      String?
+
+    // Family Information
+    spouseName String?
+    children   Json? // Array of children info
+
+    // Skills and Interests
+    skills    String?
+    interests String?
+    hobbies   String?
+
+    // Welfare Information
+    monthlyIncome    Float?
+    dependents       Int?    @default(0)
+    specialNeeds     String?
+    healthConditions String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("member_profiling")
+}
+
+model WelfareRequest {
+    id     String @id @default(cuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    // Request Details
+    title        String
+    description  String
+    category     WelfareCategory
+    urgencyLevel UrgencyLevel    @default(MEDIUM)
+    requestType  RequestType
+
+    // Financial Information
+    amountRequested  Float?
+    currentSituation String?
+    expectedOutcome  String?
+
+    // Status and Workflow
+    status   RequestStatus @default(PENDING)
+    priority Int           @default(5)
+
+    // Approval Information
+    reviewedBy      String?
+    reviewedAt      DateTime?
+    approvedBy      String?
+    approvedAt      DateTime?
+    rejectionReason String?
+
+    // Fulfillment
+    fulfilledBy      String?
+    fulfilledAt      DateTime?
+    actualAmount     Float?
+    fulfillmentNotes String?
+
+    // Additional Information
+    documents        Json? // Array of document references
+    followUpRequired Boolean   @default(false)
+    followUpDate     DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("welfare_requests")
+}
+
+model Message {
+    id          String          @id @default(cuid())
+    senderId    String
+    receiverId  String
+    subject     String?
+    content     String
+    messageType MessageType     @default(PERSONAL)
+    isRead      Boolean         @default(false)
+    priority    MessagePriority @default(NORMAL)
+
+    // Relationships
+    sender      User         @relation("SentMessages", fields: [senderId], references: [id])
+    receiver    User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+    attachments FileUpload[]
+
+    createdAt DateTime  @default(now())
+    readAt    DateTime?
+
+    @@map("messages")
+}
+
+model FileUpload {
+    id     String @id @default(cuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    fileName     String
+    originalName String
+    fileSize     Int
+    mimeType     String
+    filePath     String
+    fileType     FileType
+
+    // Optional relationships
+    messageId String?
+    message   Message? @relation(fields: [messageId], references: [id])
+
+    isPublic    Boolean @default(false)
+    description String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("file_uploads")
+}
+
+model SystemSettings {
+    id    String @id @default(cuid())
+    key   String @unique
+    value String
+    type  String // STRING, NUMBER, BOOLEAN, JSON
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("system_settings")
+}
+
+model AuditLog {
+    id         String  @id @default(cuid())
+    userId     String?
+    action     String
+    resource   String
+    resourceId String?
+    oldValues  Json?
+    newValues  Json?
+    ipAddress  String?
+    userAgent  String?
+
+    createdAt DateTime @default(now())
+
+    @@map("audit_logs")
+}
+
+// Enums
+enum UserRole {
+    ADMIN
+    WELFARE_OFFICER
+    PASTOR
+    ELDER
+    DEACON
+    MEMBER
+}
+
+enum MaritalStatus {
+    SINGLE
+    MARRIED
+    DIVORCED
+    WIDOWED
+    SEPARATED
+}
+
+enum WelfareCategory {
+    FINANCIAL_ASSISTANCE
+    MEDICAL_SUPPORT
+    EDUCATION_SUPPORT
+    HOUSING_ASSISTANCE
+    FOOD_ASSISTANCE
+    EMPLOYMENT_SUPPORT
+    COUNSELING
+    EMERGENCY_RELIEF
+    OTHER
+}
+
+enum UrgencyLevel {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+enum RequestType {
+    ONE_TIME
+    RECURRING
+    EMERGENCY
+}
+
+enum RequestStatus {
+    DRAFT
+    PENDING
+    UNDER_REVIEW
+    APPROVED
+    REJECTED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+enum MessageType {
+    PERSONAL
+    ANNOUNCEMENT
+    WELFARE_UPDATE
+    SYSTEM_NOTIFICATION
+}
+
+enum MessagePriority {
+    LOW
+    NORMAL
+    HIGH
+    URGENT
+}
+
+enum FileType {
+    DOCUMENT
+    IMAGE
+    VIDEO
+    AUDIO
+    OTHER
+}
